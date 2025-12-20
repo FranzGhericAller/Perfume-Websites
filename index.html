@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decantique - Try. Explore. Smell Amazing.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --beige: #E8DCC4;
+            --cream: #F5F1E8;
+            --black: #1A1A1A;
+            --gold: #C9A961;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            color: var(--black);
+            background: var(--cream);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--white);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: var(--black);
+            text-transform: lowercase;
+        }
+
+        .logo-accent {
+            color: var(--gold);
+            font-size: 0.9rem;
+            margin-left: 0.3rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--black);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--beige) 0%, var(--cream) 100%);
+            padding: 8rem 2rem;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            letter-spacing: 3px;
+            line-height: 1.2;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: #4A4A4A;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: var(--black);
+            color: var(--white);
+            text-decoration: none;
+            letter-spacing: 2px;
+            font-size: 1rem;
+            transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease, color 220ms ease;
+            border: 2px solid var(--black);
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .cta-button:hover {
+            background: transparent;
+            color: var(--black);
+            transform: translateY(-6px);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+        }
+
+        /* Featured products */
+        .featured {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        .featured-title{font-size:1.6rem;margin-bottom:1rem;font-weight:300}
+        .featured-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;align-items:stretch}
+        .featured-card{background:var(--white);padding:1rem;border-radius:10px;display:flex;flex-direction:column;align-items:center;transition:transform .18s ease,box-shadow .18s ease}
+        .featured-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,0.08)}
+        .featured-img{width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:10px}
+        .featured-name{font-size:0.95rem;font-weight:600;margin-bottom:6px}
+        .featured-price{color:var(--gold);font-weight:700;margin-bottom:8px}
+        .featured-actions{display:flex;gap:8px}
+        .cta-button.small{padding:0.5rem 0.9rem;font-size:0.85rem;border-radius:6px}
+        .add.featured-add{padding:0.5rem 0.9rem;border-radius:6px;border:0;background:var(--black);color:#fff;cursor:pointer}
+
+        /* Confirmation modal */
+        .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:13000}
+        .confirm-overlay.open{display:flex}
+        .confirm-modal{background:var(--white);padding:18px;border-radius:10px;min-width:320px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:left}
+        .confirm-modal h4{margin:0 0 8px 0;font-size:1.05rem}
+        .confirm-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+        .confirm-actions button{padding:8px 12px;border-radius:6px;border:0;cursor:pointer}
+        .btn-primary{background:var(--gold);color:#fff}
+        .btn-ghost{background:#fff;border:1px solid #ddd}
+
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 3rem;
+            letter-spacing: 2px;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .product-card {
+            background: var(--white);
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .product-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gold);
+        }
+
+        .product-card h3 {
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .product-card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .story {
+            background: var(--white);
+        }
+
+        .story-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .story-content p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: #4A4A4A;
+            line-height: 1.8;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .feature {
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature h3 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .feature p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .footer {
+            background: var(--black);
+            color: var(--white);
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .footer p {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: var(--gold);
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.2);
+        }
+
+        /* Chatbot styles (index) */
+        .chat-btn{position:fixed;left:20px;bottom:22px;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:var(--gold);color:#fff;font-size:20px;box-shadow:0 8px 20px rgba(0,0,0,0.2);z-index:12000;cursor:pointer;border:0}
+        .chat-panel{position:fixed;left:20px;bottom:90px;width:320px;max-width:92vw;background:var(--white);border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.12);padding:12px;display:none;flex-direction:column;z-index:12000}
+        .chat-panel.open{display:flex}
+        .chat-panel h4{margin:0 0 8px 0;font-size:1rem}
+        .chat-options{display:flex;flex-wrap:wrap;gap:8px}
+        .chat-option{padding:6px 8px;border-radius:8px;border:1px solid #eee;background:#fafafa;cursor:pointer;font-size:0.95rem}
+        .chat-results{margin-top:10px;max-height:260px;overflow:auto}
+        .chat-result-item{padding:8px;border-bottom:1px solid #f1f1f1;display:flex;justify-content:space-between;align-items:center}
+        .chat-result-item .name{font-weight:600}
+        .chat-result-item button{padding:6px 8px;border-radius:6px;border:0;background:var(--black);color:#fff;cursor:pointer}
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.8rem;
+            }
+
+            .section {
+                padding: 3rem 1rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <img id="logoImg" src="Images/logo.png" alt="site logo" style="height:36px;display:none;vertical-align:middle;margin-right:8px">
+                <span id="logoText">decantique</span><span class="logo-accent">✦</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#shop">SHOP</a></li>
+                <li><a href="#story">OUR STORY</a></li>
+                <li><a href="#how">HOW IT WORKS</a></li>
+                <li><a href="#contact">CONTACT</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Luxury Fragrance,<br>Accessible Pricing</h1>
+            <p class="tagline">Try. Explore. Smell amazing.</p>
+            <p>The fragrances you love. The sizes you'll actually use. The prices that make sense.</p>
+            <a href="products.html" class="cta-button">EXPLORE COLLECTION</a>
+        </div>
+    </section>
+
+    <section class="featured" aria-label="Featured fragrances">
+        <h2 class="featured-title">Featured — Try these first</h2>
+        <div id="featuredList" class="featured-grid">
+            <!-- populated by JS -->
+        </div>
+    </section>
+
+    <!-- Confirmation modal -->
+    <div id="confirmOverlay" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true">
+            <h4 id="confirmTitle">Added to basket</h4>
+            <div style="color:#444;margin-top:8px;font-size:0.95rem">You can review your items in the basket.</div>
+            <div class="confirm-actions">
+                <button class="btn-ghost" onclick="hideConfirm()">Continue browsing</button>
+                <button class="btn-primary" onclick="confirmGoToCart()">Go to basket</button>
+            </div>
+        </div>
+    </div>
+
+    <section class="section" id="shop">
+        <h2 class="section-title">What We Offer</h2>
+        <div class="products">
+            
+            <a href="products.html#decants" style="text-decoration:none;color:inherit">
+            <div class="product-card">
+                <div class="product-icon">✨</div>
+                <h3>10ml Decants</h3>
+                <p>Ideal for daily wear of your beloved fragrances. Enough to enjoy, small enough to switch things up whenever you want.</p>
+            </div>
+            </a>
+
+            <a href="products.html#perfumes" style="text-decoration:none;color:inherit">
+            <div class="product-card">
+                <div class="product-icon">🌙</div>
+                <h3>Middle Eastern Bottles</h3>
+                <p>Pre-order authentic Middle Eastern perfumes. Rich, captivating, unforgettable fragrances delivered directly to you.</p>
+            </div>
+            </a>
+        </div>
+    </section>
+
+    <section class="section story" id="story">
+        <div class="story-content">
+            <h2 class="section-title">Our Story</h2>
+            <p>What began as a personal love affair with fragrance has blossomed into something we're proud to share with you.</p>
+            <p>As a perfume collector, I spent years discovering the artistry behind each scent—the way a single spray could transform a mood, evoke a memory, or express something words couldn't capture. But I also witnessed the barrier that pricing created.</p>
+            <p>That's when the idea took shape: what if luxury fragrance didn't have to mean luxury spending?</p>
+            <p><strong>Decantique was born from this simple belief—that everyone deserves to smell extraordinary.</strong></p>
+            <p>We're not just selling perfume. We're opening doors to discovery, confidence, and the everyday luxury of smelling amazing.</p>
+        </div>
+    </section>
+
+    <section class="section" id="how">
+        <h2 class="section-title">Why Choose Decantique?</h2>
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🔍</div>
+                <h3>Discovery</h3>
+                <p>Try luxury fragrances without the luxury price tag. Explore confidently.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💎</div>
+                <h3>Quality</h3>
+                <p>Authentic fragrances, carefully decanted and curated. No compromises.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <h3>Affordability</h3>
+                <p>Build your collection without breaking the bank. Luxury for everyone.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌟</div>
+                <h3>Passion</h3>
+                <p>Run by perfume lovers, for perfume lovers. We care about every scent.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" id="contact">
+        <div class="footer-content">
+            <div class="footer-logo">decantique</div>
+            <div class="social-links">
+                
+                <a id="userFooterLink" href="https://www.facebook.com/franz.aller/" title="Facebook" target="_blank" rel="noopener noreferrer">🔗</a>
+            </div>
+            <p>© 2025 Decantique. Smell amazing, every day.</p>
+        </div>
+    </footer>
+    <!-- Chatbot widget (index) -->
+    <button id="chatBtnIndex" class="chat-btn" aria-label="Assistant">💬</button>
+    <div id="chatPanelIndex" class="chat-panel" aria-hidden="true">
+        <h4>Find perfumes for...</h4>
+        <div class="chat-options">
+            <div class="chat-option" data-key="day">Good for Day</div>
+            <div class="chat-option" data-key="night">Good for Night</div>
+            <div class="chat-option" data-key="daily">Daily Wear</div>
+            <div class="chat-option" data-key="versatile">Versatile</div>
+        </div>
+        <div class="chat-results" id="chatResultsIndex" aria-live="polite"></div>
+    </div>
+
+    <script>
+        // Simple rule-based recommendations for index page
+        (function(){
+            const chatBtn = document.getElementById('chatBtnIndex');
+            const chatPanel = document.getElementById('chatPanelIndex');
+            const chatResults = document.getElementById('chatResultsIndex');
+
+            const RECOMMENDATIONS = {
+                day: [ 'Nautica Voyage Inspired — Decant 10ml', 'Gentle Fluidity Silver Inspired — Decant 10ml', 'Hawas Ice — Decant 10ml' ],
+                night: [ 'Modest Une — Decant 10ml', 'Supremacy Collectors Edition — Decant 10ml', 'YSL Ultime — Decant 10ml' ],
+                daily: [ 'SWYI inspired — Decant 10ml', 'Eros Flame Clone — Decant 10ml', 'Cocktail Intense — Decant 10ml' ],
+                versatile: [ 'Hawas Ice — Decant 10ml', 'Gentle Fluidity Silver Inspired — Decant 10ml', 'Modest Une — Decant 10ml' ]
+            };
+
+            // map names to minimal item data (ids are optional) — matches products.html names/prices
+            const ITEM_MAP = {
+                'Hawas Ice — Decant 10ml': {id:1,name:'Hawas Ice — Decant 10ml',price:'399',image:'Images/hawas-ice.webp'},
+                'Modest Une — Decant 10ml': {id:2,name:'Modest Une — Decant 10ml',price:'399',image:'Images/modes-une1.jpg'},
+                'Supremacy Collectors Edition — Decant 10ml': {id:3,name:'Supremacy Collectors Edition — Decant 10ml',price:'599',image:'Images/supremacy-collectors.png'},
+                'YSL Ultime — Decant 10ml': {id:4,name:'YSL Ultime — Decant 10ml',price:'799',image:'Images/ysl-ultime.jpg'},
+                'Cocktail Intense — Decant 10ml': {id:5,name:'Cocktail Intense — Decant 10ml',price:'299',image:'Images/cocktail-intense.jpg'},
+                'SWYI inspired — Decant 10ml': {id:6,name:'SWYI inspired — Decant 10ml',price:'249',image:'Images/swyi-inspired.jpg'},
+                'Nautica Voyage Inspired — Decant 10ml': {id:7,name:'Nautica Voyage Inspired — Decant 10ml',price:'249',image:'Images/nautica-voyage.jpg'},
+                'Eros Flame Clone — Decant 10ml': {id:8,name:'Eros Flame Clone — Decant 10ml',price:'349',image:'Images/eros-flame.webp'},
+                'Gentle Fluidity Silver Inspired — Decant 10ml': {id:9,name:'Gentle Fluidity Silver Inspired — Decant 10ml',price:'249',image:'Images/gentle-fluidity-silver.jpg'},
+                'Club De Nuit Intense EDT — 100ml': {id:102,name:'Club De Nuit Intense EDT — 100ml',price:'2499',image:'Images/CDN.webp'}
+            };
+
+            function loadCart(){ try{ return JSON.parse(localStorage.getItem('decantique_cart')||'[]'); }catch(e){return [];} }
+            function saveCart(cart){ localStorage.setItem('decantique_cart', JSON.stringify(cart)); }
+
+            function addToCartAndGo(item){
+                const cart = loadCart();
+                const idx = cart.findIndex(c=>c.name === item.name);
+                if(idx > -1) cart[idx].qty = (cart[idx].qty||0) + 1;
+                else cart.push({...item, qty:1});
+                saveCart(cart);
+                // go to products page so user can see cart
+                window.location.href = 'products.html#decants';
+            }
+
+            function renderRecommendations(key){
+                const list = RECOMMENDATIONS[key] || [];
+                chatResults.innerHTML = '';
+                if(list.length === 0){ chatResults.textContent = 'No recommendations.'; return; }
+                list.forEach(name=>{
+                    const div = document.createElement('div'); div.className = 'chat-result-item';
+                    const left = document.createElement('div'); left.className = 'name'; left.textContent = name;
+                    const btn = document.createElement('button'); btn.textContent = 'Add';
+                    btn.addEventListener('click', ()=>{
+                        const item = ITEM_MAP[name] || {id:Date.now(),name:name,price:'',image:''};
+                        addToCartAndGo(item);
+                    });
+                    div.appendChild(left); div.appendChild(btn); chatResults.appendChild(div);
+                });
+            }
+
+            chatBtn.addEventListener('click', ()=>{
+                const open = chatPanel.classList.toggle('open');
+                chatPanel.setAttribute('aria-hidden', String(!open));
+            });
+
+            document.querySelectorAll('#chatPanelIndex .chat-option').forEach(el=>{
+                el.addEventListener('click', ()=>{
+                    renderRecommendations(el.getAttribute('data-key'));
+                });
+            });
+        })();
+    </script>
+    <script>
+        // Featured products render + quick-add cart helpers
+        (function(){
+            function loadCart(){ try{ return JSON.parse(localStorage.getItem('decantique_cart')||'[]'); }catch(e){return [];} }
+            function saveCart(c){ localStorage.setItem('decantique_cart', JSON.stringify(c)); }
+            function addToCart(item, qty=1){ const cart = loadCart(); const idx = cart.findIndex(c=>c.name===item.name); if(idx>-1) cart[idx].qty = (cart[idx].qty||0) + qty; else cart.push({...item, qty}); saveCart(cart); }
+
+            function renderFeatured(){
+                const container = document.getElementById('featuredList'); if(!container) return;
+                const picks = [
+                    {id:1, name: 'Hawas Ice — Decant 10ml', price:'399', image:'Images/hawas-ice.webp'},
+                    {id:9, name: 'Gentle Fluidity Silver Inspired — Decant 10ml', price:'249', image:'Images/gentle-fluidity-silver.jpg'},
+                    {id:2, name: 'Modest Une — Decant 10ml', price:'399', image:'Images/modes-une1.jpg'}
+                ];
+                container.innerHTML = '';
+                picks.forEach(it=>{
+                    const card = document.createElement('div'); card.className = 'featured-card';
+                    const img = document.createElement('img'); img.className = 'featured-img'; img.src = it.image; img.alt = it.name;
+                    const title = document.createElement('div'); title.className = 'featured-name'; title.textContent = it.name;
+                    const price = document.createElement('div'); price.className = 'featured-price'; price.textContent = (it.price ? ('₱' + it.price) : '');
+                    const actions = document.createElement('div'); actions.className = 'featured-actions';
+                    const view = document.createElement('a'); view.className = 'cta-button small'; view.href = 'products.html#decants'; view.textContent = 'View';
+                    const add = document.createElement('button'); add.className = 'add featured-add'; add.textContent = 'Add';
+                    add.addEventListener('click', ()=>{
+                        // show confirmation modal instead of alert; modal OK will navigate to products and open cart
+                        const payload = {id: it.id||Date.now(), name: it.name, price: it.price, image: it.image};
+                        showConfirm(payload);
+                    });
+                    actions.appendChild(view); actions.appendChild(add);
+                    card.appendChild(img); card.appendChild(title); card.appendChild(price); card.appendChild(actions);
+                    container.appendChild(card);
+                });
+            }
+
+            // ITEM_MAP is defined in the chatbot script; wait for DOMContentLoaded to render
+            document.addEventListener('DOMContentLoaded', function(){
+                // if ITEM_MAP not yet defined, try a short delay
+                if(typeof ITEM_MAP === 'undefined'){
+                    setTimeout(renderFeatured, 200);
+                } else renderFeatured();
+            });
+
+            // Confirmation modal helpers
+            function showConfirm(item){
+                // add item to localStorage cart first
+                addToCart(item, 1);
+                const overlay = document.getElementById('confirmOverlay');
+                const title = document.getElementById('confirmTitle');
+                if(overlay && title){
+                    title.textContent = item.name + ' added to basket';
+                    overlay.classList.add('open');
+                } else {
+                    // fallback navigation
+                    window.location.href = 'products.html?openCart=1#decants';
+                }
+            }
+
+            function hideConfirm(){ const overlay = document.getElementById('confirmOverlay'); if(overlay) overlay.classList.remove('open'); }
+
+            // when OK clicked, go to products page and open cart
+            function confirmGoToCart(){ hideConfirm(); window.location.href = 'products.html?openCart=1#decants'; }
+
+            // expose to global so inline handlers or other scripts can call them
+            try{ window.showConfirm = showConfirm; window.hideConfirm = hideConfirm; window.confirmGoToCart = confirmGoToCart; }catch(e){}
+        })();
+    </script>
+
+    <script>
+        // Show image logo if available, otherwise keep text logo
+        (function(){
+            const img = document.getElementById('logoImg');
+            const text = document.getElementById('logoText');
+            if(!img) return;
+            img.onload = function(){ img.style.display = 'inline-block'; if(text) text.style.display='none'; };
+            img.onerror = function(){ img.style.display = 'none'; if(text) text.style.display='inline'; };
+            // try to trigger load (browser will attempt automatically)
+        })();
+    </script>
+</body>
+</html>

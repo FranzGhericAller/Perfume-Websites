@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Decantique — Products</title>
+    <style>
+        :root{--beige:#E8DCC4;--cream:#F5F1E8;--black:#1A1A1A;--gold:#C9A961;--white:#FFFFFF}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Georgia,serif;background:var(--cream);color:var(--black);line-height:1.5}
+        .header{background:var(--white);padding:1rem 2rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+        .nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+        .logo{font-size:1.2rem;font-weight:300}
+        .container{max-width:1200px;margin:2rem auto;padding:0 1rem}
+        .page-title{text-align:center;font-size:2rem;margin-bottom:1rem;font-weight:300}
+        .controls{display:flex;gap:1rem;justify-content:center;margin-bottom:1.5rem}
+        .btn{padding:0.6rem 1rem;border:2px solid var(--black);background:var(--white);cursor:pointer}
+        .btn.active{background:var(--black);color:var(--white);border-color:var(--black)}
+
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;align-items:stretch}
+        .card{background:var(--white);padding:1rem;text-align:center;display:flex;flex-direction:column;justify-content:space-between;align-items:center;min-height:360px}
+        .thumb{height:160px;background:linear-gradient(135deg,var(--beige),var(--cream));display:flex;align-items:center;justify-content:center;color:var(--black);overflow:hidden;padding:0;border-radius:4px;flex:0 0 auto}
+        .thumb-img{width:100%;height:160px;object-fit:cover;display:block;border:0}
+        .name{font-weight:500}
+        .price{display:block;color:var(--gold);font-weight:600;font-size:0.95rem;margin:0.35rem 0 0 0;text-align:center}
+        .price-label{color:#333;font-weight:500;margin-right:6px;font-size:0.9rem}
+        .price-value{color:var(--gold);font-weight:600}
+        .meta{color:#666;font-size:0.9rem}
+        .actions{margin-top:0.25rem;display:flex;justify-content:center;width:100%}
+        .add{padding:0.55rem 1rem;border:2px solid var(--black);background:var(--white);cursor:pointer;min-width:120px;border-radius:6px;font-size:0.95rem;text-align:center;transition:background .12s,color .12s,transform .08s;box-shadow:0 2px 0 rgba(0,0,0,0.04)}
+        .add{width:70%}
+        .add:hover{background:var(--black);color:var(--white);transform:translateY(-2px)}
+
+        .empty{padding:2rem;text-align:center;color:#666}
+
+        @media (max-width:600px){.thumb{height:110px}.thumb-img{height:110px}}
+
+        /* Lightbox styles */
+        .lightbox{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:9999;padding:1rem}
+        .lightbox-content{max-width:1100px;width:100%;max-height:90vh;position:relative;display:flex;flex-direction:column;align-items:center}
+        .lightbox img{max-width:100%;max-height:80vh;object-fit:contain;border-radius:4px}
+        .lightbox-caption{color:#fff;margin-top:0.6rem;text-align:center}
+        .lightbox-close{position:absolute;right:0.3rem;top:0.3rem;background:transparent;border:0;color:#fff;font-size:2rem;cursor:pointer}
+        /* Floating cart styles */
+        .cart-btn{position:fixed;right:20px;bottom:22px;border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;background:var(--black);color:var(--white);font-size:20px;box-shadow:0 8px 20px rgba(0,0,0,0.2);z-index:11000;cursor:pointer;border:0}
+        .cart-btn span{font-size:12px;line-height:1}
+
+        .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);opacity:0;pointer-events:none;transition:opacity .18s ease;z-index:10990}
+        .cart-overlay.open{opacity:1;pointer-events:auto}
+
+        .cart-panel{position:fixed;right:0;top:0;height:100vh;width:360px;max-width:92vw;background:var(--white);box-shadow:-18px 0 40px rgba(0,0,0,0.12);transform:translateX(110%);transition:transform .22s cubic-bezier(.2,.9,.2,1);z-index:11000;padding:1rem 1rem 1.2rem;display:flex;flex-direction:column}
+        .cart-panel.open{transform:translateX(0)}
+        .cart-close{position:absolute;left:8px;top:8px;border:0;background:transparent;font-size:28px;cursor:pointer}
+        .cart-panel h3{margin:0 0 0.6rem 0;font-size:1.05rem;padding-left:36px}
+
+        #cartItems li{border-bottom:1px solid rgba(0,0,0,0.05);padding:12px 0;display:flex;gap:10px;align-items:center}
+        #cartItems img{width:64px;height:64px;object-fit:cover;border-radius:6px}
+        #cartItems .cart-info{flex:1}
+        #cartItems .cart-info .title{font-weight:600;font-size:0.95rem}
+        #cartItems .cart-info .sub{color:#666;font-size:0.85rem;margin-top:6px}
+        #cartItems .cart-controls{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+        #cartItems .cart-controls .qty{display:inline-flex;gap:6px;align-items:center}
+        #cartItems button.small{width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer}
+        #cartItems button.remove{background:transparent;border:0;color:#c00;font-size:0.85rem;cursor:pointer}
+
+        .cart-footer{margin-top:auto}
+        .cart-total-row{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(0,0,0,0.06);font-weight:700}
+        .cart-actions{display:flex;gap:8px;margin-top:12px}
+        .cart-actions button{flex:1;padding:10px;border-radius:6px;border:0;cursor:pointer}
+        .cart-actions .checkout{background:var(--gold);color:#fff}
+        .cart-actions .clear{background:#fff;border:1px solid #ddd}
+        /* Checkout modal */
+        .checkout-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:11200;padding:16px}
+        .checkout-overlay.open{display:flex}
+        .checkout-modal{background:var(--white);width:720px;max-width:100%;max-height:90vh;overflow:auto;border-radius:10px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+        .checkout-row{display:flex;gap:12px}
+        .checkout-left{flex:1}
+        .checkout-right{width:320px;flex-shrink:0}
+        .checkout-modal h3{margin:0 0 8px}
+        .order-summary{font-size:0.95rem;margin-bottom:8px}
+        .preview-img{width:100%;height:auto;border-radius:6px;border:1px solid #eee;background:#fafafa}
+        .checkout-actions{display:flex;gap:8px;margin-top:10px}
+        .checkout-actions button{padding:8px 10px;border-radius:6px;border:0;cursor:pointer}
+        .btn-primary{background:var(--gold);color:#fff}
+        .btn-ghost{background:#fff;border:1px solid #ddd}
+        /* Quantity modal */
+        .qty-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:11100}
+        .qty-overlay.open{display:flex}
+        .qty-modal{background:var(--white);padding:18px;border-radius:10px;min-width:260px;box-shadow:0 10px 30px rgba(0,0,0,0.12);text-align:center}
+        .qty-modal h4{margin:0 0 8px 0}
+        .qty-controls{display:flex;align-items:center;gap:10px;justify-content:center;margin-top:8px}
+        .qty-controls button{width:36px;height:36px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:18px}
+        .qty-display{min-width:48px;padding:6px 8px;border-radius:6px;border:1px solid #eee;font-weight:700}
+        .qty-actions{display:flex;gap:8px;margin-top:12px}
+        .qty-actions button{flex:1;padding:8px;border-radius:6px;border:0;cursor:pointer}
+        .qty-actions .add{background:var(--gold);color:#fff}
+        .qty-actions .cancel{background:#fff;border:1px solid #ddd}
+        /* Chatbot styles */
+        .chat-btn{position:fixed;left:20px;bottom:22px;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:var(--gold);color:#fff;font-size:20px;box-shadow:0 8px 20px rgba(0,0,0,0.2);z-index:12000;cursor:pointer;border:0}
+        .chat-panel{position:fixed;left:20px;bottom:90px;width:320px;max-width:92vw;background:var(--white);border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.12);padding:12px;display:none;flex-direction:column;z-index:12000}
+        .chat-panel.open{display:flex}
+        .chat-panel h4{margin:0 0 8px 0;font-size:1rem}
+        .chat-options{display:flex;flex-wrap:wrap;gap:8px}
+        .chat-option{padding:6px 8px;border-radius:8px;border:1px solid #eee;background:#fafafa;cursor:pointer;font-size:0.95rem}
+        .chat-results{margin-top:10px;max-height:260px;overflow:auto}
+        .chat-result-item{padding:8px;border-bottom:1px solid #f1f1f1;display:flex;justify-content:space-between;align-items:center}
+        .chat-result-item .name{font-weight:600}
+        .chat-result-item button{padding:6px 8px;border-radius:6px;border:0;background:var(--black);color:#fff;cursor:pointer}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">decantique<span style="color:var(--gold)">✦</span></div>
+            <div><a href="index.html" style="text-decoration:none;color:var(--black)">← Back</a></div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Explore — Choose Decants or Perfumes</h1>
+
+        <div class="controls">
+            <button id="decantsBtn" class="btn active">Decants</button>
+            <button id="perfumesBtn" class="btn">Perfumes</button>
+        </div>
+
+        <div id="list" class="grid" aria-live="polite"></div>
+        <div id="empty" class="empty" style="display:none">No items to show.</div>
+    </main>
+
+    <!-- Floating cart button and panel -->
+    <button id="cartBtn" class="cart-btn" aria-label="Open basket">🧺 <span id="cartBadge" style="background:var(--gold);color:#fff;border-radius:999px;padding:0 6px;margin-left:6px;font-weight:700">0</span></button>
+
+    <div id="cartOverlay" class="cart-overlay"></div>
+    <aside id="cartPanel" class="cart-panel" aria-hidden="true">
+        <button id="cartClose" class="cart-close" aria-label="Close cart">×</button>
+        <h3>Basket (<span id="cartCount">0</span>)</h3>
+        <ul id="cartItems" style="list-style:none;padding:0;margin:0 0 1rem 0"></ul>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:0.5rem;border-top:1px solid rgba(0,0,0,0.06)">
+            <div style="font-weight:600">Total:</div>
+            <div id="cartTotal" style="color:var(--gold);font-weight:700">₱0</div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.5rem">
+            <button id="checkoutBtn" style="flex:1;padding:0.6rem;border-radius:6px;border:0;background:var(--gold);color:#fff;cursor:pointer">Checkout</button>
+            <button id="clearCartBtn" style="padding:0.6rem;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer">Clear</button>
+        </div>
+    </aside>
+
+    <!-- Lightbox markup -->
+    <div id="lightbox" class="lightbox" style="display:none" aria-hidden="true">
+        <div class="lightbox-content" role="dialog" aria-modal="true">
+            <button id="lightboxClose" class="lightbox-close" aria-label="Close">×</button>
+            <img id="lightboxImg" src="" alt="" />
+            <div id="lightboxCaption" class="lightbox-caption"></div>
+        </div>
+    </div>
+
+    <!-- Quantity modal -->
+    <div id="qtyOverlay" class="qty-overlay" aria-hidden="true">
+        <div class="qty-modal" role="dialog" aria-modal="true" aria-labelledby="qtyTitle">
+            <h4 id="qtyTitle">Add to basket</h4>
+            <div id="qtyName" style="font-size:0.95rem;color:#333;margin-bottom:6px"></div>
+            <div class="qty-controls">
+                <button id="qtyMinus" type="button">−</button>
+                <div id="qtyDisplay" class="qty-display">1</div>
+                <button id="qtyPlus" type="button">+</button>
+            </div>
+            <div class="qty-actions">
+                <button id="qtyAddBtn" class="add">Add</button>
+                <button id="qtyCancelBtn" class="cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout modal (message + preview) -->
+    <div id="checkoutOverlay" class="checkout-overlay" aria-hidden="true">
+        <div class="checkout-modal" role="dialog" aria-modal="true">
+            <button id="checkoutClose" style="float:right;border:0;background:transparent;font-size:22px;cursor:pointer">×</button>
+            <h3>Send Order to Facebook</h3>
+            <div class="checkout-row">
+                <div class="checkout-left">
+                    <div class="order-summary" id="orderSummary"></div>
+                    <label for="orderMessage">Message (edit if needed)</label>
+                    <textarea id="orderMessage" rows="6" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;border:1px solid #eee"></textarea>
+                    <div class="checkout-actions">
+                        <button id="copyMsgBtn" class="btn-ghost">Copy Message</button>
+                        <button id="downloadImgBtn" class="btn-ghost">Download Image</button>
+                        <button id="sendFbBtn" class="btn-primary">Open Facebook (send)</button>
+                    </div>
+                </div>
+
+                    <!-- Chatbot widget -->
+                    <button id="chatBtn" class="chat-btn" aria-label="Assistant">💬</button>
+                    <div id="chatPanel" class="chat-panel" aria-hidden="true">
+                        <h4>Find perfumes for...</h4>
+                        <div class="chat-options">
+                            <div class="chat-option" data-key="day">Good for Day</div>
+                            <div class="chat-option" data-key="night">Good for Night</div>
+                            <div class="chat-option" data-key="daily">Daily Wear</div>
+                            <div class="chat-option" data-key="versatile">Versatile</div>
+                        </div>
+                        <div class="chat-results" id="chatResults" aria-live="polite"></div>
+                    </div>
+                <div class="checkout-right">
+                    <div style="font-size:0.95rem;margin-bottom:8px">Screenshot Preview</div>
+                    <img id="checkoutPreview" class="preview-img" src="" alt="Preview" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const decants = [
+            {id:1,name:'Hawas Ice — Decant 10ml',price:'399',desc:'Fresh, fruity, masculine.', image:'Images/hawas-ice.webp'},
+            {id:2,name:'Modest Une — Decant 10ml',price:'399',desc:'Fresh, Dark, Masculine', image:'Images/modes-une1.jpg'},
+            {id:3,name:'Supremacy Collectors Edition — Decant 10ml',price:'599',desc:'Rich, dark, luxurious.', image:'Images/supremacy-collectors.png'},
+            {id:4,name:'YSL Ultime — Decant 10ml',price:'799',desc:'Light, airy, ethereal.', image:'Images/ysl-ultime.jpg'},
+            {id:5,name:'Cocktail Intense — Decant 10ml',price:'299',desc:'Smooth, woody, timeless.', image:'Images/cocktail-intense.jpg'},
+            {id:6,name:'SWYI inspired — Decant 10ml',price:'249',desc:'Smooth, woody, sweet.', image:'Images/swyi-inspired.jpg'},
+            {id:7,name:'Nautica Voyage Inspired — Decant 10ml',price:'249',desc:'Fresh, oceanic, masculine.', image:'Images/nautica-voyage.jpg'},
+            {id:8,name:'Eros Flame Clone — Decant 10ml',price:'349',desc:'Fresh, sweet, masculine.', image:'Images/eros-flame.webp'},
+            {id:9,name:'Gentle Fluidity Silver Inspired — Decant 10ml',price:'249',desc:'light, airy, ethereal.', image:'Images/gentle-fluidity-silver.jpg'}
+        ];
+
+        const perfumes = [
+            {id:101,name:'Hawas Ice — 100 ml',price:'2199',desc:'Pre-Order Brand new full bottle.', image:'Images/hawas-ice.webp'},
+            {id:102,name:'Club De Nuit Intense EDT — 100ml',price:'2499',desc:'Pre-Order Brand new full bottle.', image:'Images/CDN.webp'},
+            {id:103,name:'Pacific Aura — 100 ml',price:'1999',desc:'Pre-Order Brand new full bottle.', image:'Images/Pacific-Aura.webp'},
+            {id:104,name:'Tropical Vibe — 100ml',price:'1999',desc:'Pre-Order Brand new full bottle.', image:'Images/Tropical Vibe.webp'},
+            {id:105,name:'Shiyaaka Shadow — 100ml',price:'1999',desc:'Pre-Order Brand new full bottle.', image:'Images/shadow.webp'},
+            {id:106,name:'Shiyaaka Blue — 100ml',price:'1499',desc:'Pre-Order Brand new full bottle.', image:'Images/blue.webp'},
+            {id:107,name:'La Uno Million EDP — 100ml',price:'1499',desc:'Pre-Order Brand new full bottle.', image:'Images/million edp.webp'},
+            {id:108,name:'Valhalla— 100ml',price:'1999',desc:'Pre-Order Brand new full bottle.', image:'Images/valhalla.webp'},
+        ];  
+
+        // image helper: returns provided image or an inline SVG placeholder
+        function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        function placeholderDataUrl(name){
+            const title = esc((name||'').split('—')[0].trim() || 'Perfume');
+            const svg = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><rect width="100%" height="100%" fill="#E8DCC4"/><g fill="#1A1A1A" font-family="Georgia, serif"><text x="50%" y="48%" font-size="36" text-anchor="middle" dominant-baseline="middle">${title}</text><text x="50%" y="70%" font-size="18" text-anchor="middle" dominant-baseline="middle">Decantique</text></g></svg>`;
+            return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        }
+
+        function getImageSrc(item){
+            if(item && item.image && item.image.trim()) return item.image;
+            return placeholderDataUrl(item && item.name ? item.name : 'Perfume');
+        }
+
+        // Price formatting: if price is only digits (or digits+commas) assume Philippine peso ₱
+        function formatPrice(p){
+            if(p === undefined || p === null) return '';
+            const s = String(p).trim();
+            if(s === '') return '';
+            // already has a currency symbol (common ones)
+            if(/^[\$£€₦₱]/.test(s)) return s;
+            // numeric (digits and optional commas)
+            if(/^[0-9,]+$/.test(s)) return '₱' + s;
+            return s;
+        }
+
+        const listEl = document.getElementById('list');
+        const emptyEl = document.getElementById('empty');
+        const decantsBtn = document.getElementById('decantsBtn');
+        const perfumesBtn = document.getElementById('perfumesBtn');
+
+        function render(items){
+            listEl.innerHTML='';
+            if(!items || items.length===0){
+                emptyEl.style.display='block';
+                return;
+            }
+            emptyEl.style.display='none';
+            items.forEach(it=>{
+                const card = document.createElement('article');
+                card.className='card';
+
+                const thumb = document.createElement('div');
+                thumb.className='thumb';
+                const img = document.createElement('img');
+                img.className = 'thumb-img';
+                img.alt = it.name;
+                img.src = getImageSrc(it);
+                // open lightbox on click
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', ()=> openLightbox(img.src, it.name));
+                thumb.appendChild(img);
+
+                const name = document.createElement('div');
+                name.className='name';
+                name.textContent = it.name;
+
+                const meta = document.createElement('div');
+                meta.className='meta';
+                meta.textContent = it.desc || '';
+
+                const price = document.createElement('div');
+                price.className='price';
+                const label = document.createElement('span');
+                label.className = 'price-label';
+                label.textContent = 'Price:';
+                const val = document.createElement('span');
+                val.className = 'price-value';
+                val.textContent = formatPrice(it.price || '');
+                price.appendChild(label);
+                price.appendChild(val);
+
+                const actions = document.createElement('div');
+                actions.className='actions';
+                const btn = document.createElement('button');
+                btn.className='add';
+                btn.textContent='Select';
+                btn.addEventListener('click',()=>{
+                    openQtyModal({id: it.id, name: it.name, price: it.price, image: getImageSrc(it)});
+                });
+                actions.appendChild(btn);
+
+                card.appendChild(thumb);
+                card.appendChild(name);
+                card.appendChild(meta);
+                card.appendChild(price);
+                card.appendChild(actions);
+
+                listEl.appendChild(card);
+            });
+        }
+
+        function setActive(btn){
+            document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        decantsBtn.addEventListener('click',()=>{ setActive(decantsBtn); render(decants); });
+        perfumesBtn.addEventListener('click',()=>{ setActive(perfumesBtn); render(perfumes); });
+
+        // initial render based on URL (hash or ?tab=)
+        function openCategoryFromUrl(){
+            try{
+                const params = new URLSearchParams(window.location.search);
+                const tab = params.get('tab');
+                const hash = (window.location.hash || '').replace('#','').toLowerCase();
+                if(tab && String(tab).toLowerCase() === 'perfumes'){
+                    setActive(perfumesBtn); render(perfumes); return;
+                }
+                if(tab && String(tab).toLowerCase() === 'decants'){
+                    setActive(decantsBtn); render(decants); return;
+                }
+                if(hash === 'perfumes'){
+                    setActive(perfumesBtn); render(perfumes); return;
+                }
+                // default to decants
+                setActive(decantsBtn); render(decants);
+            }catch(e){
+                // fallback
+                setActive(decantsBtn); render(decants);
+            }
+        }
+
+        openCategoryFromUrl();
+        window.addEventListener('hashchange', openCategoryFromUrl);
+
+        // Lightbox functions
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxCaption = document.getElementById('lightboxCaption');
+        const lightboxClose = document.getElementById('lightboxClose');
+
+        function openLightbox(src, caption){
+            lightboxImg.src = src;
+            lightboxImg.alt = caption || '';
+            lightboxCaption.textContent = caption || '';
+            lightbox.style.display = 'flex';
+            lightbox.setAttribute('aria-hidden','false');
+            document.body.style.overflow = 'hidden';
+            lightboxClose.focus();
+        }
+
+        function closeLightbox(){
+            lightbox.style.display = 'none';
+            lightbox.setAttribute('aria-hidden','true');
+            lightboxImg.src = '';
+            document.body.style.overflow = '';
+        }
+
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbox(); });
+        document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeLightbox(); });
+
+        // CART implementation
+        const cartBtn = document.getElementById('cartBtn');
+        const cartBadge = document.getElementById('cartBadge');
+        const cartOverlay = document.getElementById('cartOverlay');
+        const cartPanel = document.getElementById('cartPanel');
+        const cartClose = document.getElementById('cartClose');
+        const cartItemsEl = document.getElementById('cartItems');
+        const cartCountEl = document.getElementById('cartCount');
+        const cartTotalEl = document.getElementById('cartTotal');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const clearCartBtn = document.getElementById('clearCartBtn');
+
+        let CART = loadCart();
+
+        function priceToNumber(p){
+            if(p === undefined || p === null) return 0;
+            const s = String(p);
+            const num = parseFloat(s.replace(/[^0-9\.]/g, ''));
+            return isNaN(num) ? 0 : num;
+        }
+
+        function loadCart(){
+            try{ const raw = localStorage.getItem('decantique_cart'); return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+        }
+
+        function saveCart(){ localStorage.setItem('decantique_cart', JSON.stringify(CART)); }
+
+        function addToCart(item, qty){
+            const idx = CART.findIndex(c => c.id === item.id);
+            if(idx > -1){ CART[idx].qty += qty; }
+            else { CART.push({ ...item, qty: qty }); }
+            saveCart();
+            renderCart();
+        }
+
+        function updateQty(id, qty){
+            const idx = CART.findIndex(c => c.id === id); if(idx === -1) return;
+            CART[idx].qty = qty; if(CART[idx].qty < 1) CART.splice(idx,1);
+            saveCart(); renderCart();
+        }
+
+        function removeFromCart(id){ CART = CART.filter(c=>c.id!==id); saveCart(); renderCart(); }
+
+        function computeTotal(){
+            return CART.reduce((sum, c) => sum + priceToNumber(c.price) * (c.qty || 0), 0);
+        }
+
+        function renderCart(){
+            cartItemsEl.innerHTML = '';
+            if(CART.length === 0){ cartItemsEl.innerHTML = '<li style="padding:1rem;color:#666">Your basket is empty.</li>'; }
+            CART.forEach(item =>{
+                const li = document.createElement('li');
+                li.style.display='flex'; li.style.gap='0.6rem'; li.style.alignItems='center'; li.style.padding='0.6rem 0';
+
+                const img = document.createElement('img'); img.src = item.image; img.alt = item.name; img.style.width='56px'; img.style.height='56px'; img.style.objectFit='cover'; img.style.borderRadius='4px';
+                const info = document.createElement('div'); info.style.flex='1';
+                const title = document.createElement('div'); title.textContent = item.name; title.style.fontSize='0.95rem'; title.style.fontWeight='600';
+                const price = document.createElement('div'); price.textContent = formatPrice(item.price) + ' each'; price.style.fontSize='0.85rem'; price.style.color='#666';
+                info.appendChild(title); info.appendChild(price);
+
+                const controls = document.createElement('div'); controls.style.display='flex'; controls.style.flexDirection='column'; controls.style.alignItems='flex-end';
+                const qtyRow = document.createElement('div'); qtyRow.style.display='flex'; qtyRow.style.gap='0.3rem'; qtyRow.style.alignItems='center';
+                const minus = document.createElement('button'); minus.textContent='−'; minus.style.width='26px'; minus.style.height='26px'; minus.style.border='1px solid #ddd'; minus.style.background='#fff'; minus.style.cursor='pointer';
+                const qty = document.createElement('div'); qty.textContent = item.qty; qty.style.padding='0 6px';
+                const plus = document.createElement('button'); plus.textContent='+'; plus.style.width='26px'; plus.style.height='26px'; plus.style.border='1px solid #ddd'; plus.style.background='#fff'; plus.style.cursor='pointer';
+                qtyRow.appendChild(minus); qtyRow.appendChild(qty); qtyRow.appendChild(plus);
+                const sub = document.createElement('div'); sub.textContent = formatPrice( (priceToNumber(item.price) * item.qty).toString() ); sub.style.fontWeight='700'; sub.style.marginTop='6px';
+                const rem = document.createElement('button'); rem.textContent='Remove'; rem.style.marginTop='6px'; rem.style.fontSize='0.8rem'; rem.style.border='none'; rem.style.background='transparent'; rem.style.color='#c00'; rem.style.cursor='pointer';
+
+                minus.addEventListener('click', ()=>{ updateQty(item.id, Math.max(0, item.qty-1)); });
+                plus.addEventListener('click', ()=>{ updateQty(item.id, item.qty+1); });
+                rem.addEventListener('click', ()=> removeFromCart(item.id));
+
+                controls.appendChild(qtyRow); controls.appendChild(sub); controls.appendChild(rem);
+
+                li.appendChild(img); li.appendChild(info); li.appendChild(controls);
+                cartItemsEl.appendChild(li);
+            });
+
+            const total = computeTotal();
+            cartTotalEl.textContent = formatPrice(String(total));
+            cartCountEl.textContent = CART.reduce((s,c)=>s+(c.qty||0),0);
+            cartBadge.textContent = CART.reduce((s,c)=>s+(c.qty||0),0);
+        }
+
+        function openCart(){ cartOverlay.classList.add('open'); cartPanel.classList.add('open'); cartPanel.setAttribute('aria-hidden','false'); renderCart(); document.body.style.overflow='hidden'; }
+        function closeCart(){ cartOverlay.classList.remove('open'); cartPanel.classList.remove('open'); cartPanel.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+        cartBtn.addEventListener('click', ()=> openCart());
+        cartClose.addEventListener('click', ()=> closeCart());
+        cartOverlay.addEventListener('click', ()=> closeCart());
+        checkoutBtn.addEventListener('click', handleCheckout);
+
+        // Checkout: capture screenshot of the cart and open Facebook messenger
+        function loadScript(src){
+            return new Promise((resolve,reject)=>{
+                const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.body.appendChild(s);
+            });
+        }
+
+        async function handleCheckout(){
+            if(CART.length === 0){ alert('Your basket is empty.'); return; }
+            checkoutBtn.disabled = true; checkoutBtn.textContent = 'Preparing...';
+            try{
+                if(typeof html2canvas === 'undefined'){
+                    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+                }
+                // capture the cart panel
+                const node = document.getElementById('cartPanel') || document.body;
+                const canvas = await html2canvas(node, {backgroundColor: null, scale: 1});
+                // get data URL for preview and download
+                const dataUrl = canvas.toDataURL('image/png');
+                // populate checkout modal
+                const checkoutOverlay = document.getElementById('checkoutOverlay');
+                const checkoutPreview = document.getElementById('checkoutPreview');
+                const orderMessageEl = document.getElementById('orderMessage');
+                const orderSummaryEl = document.getElementById('orderSummary');
+                checkoutPreview.src = dataUrl;
+                const msg = generateOrderMessage();
+                orderMessageEl.value = msg;
+                orderSummaryEl.innerHTML = '<strong>Items:</strong> ' + CART.length + ' — Total: ' + formatPrice(String(computeTotal()));
+                checkoutOverlay.classList.add('open'); checkoutOverlay.setAttribute('aria-hidden','false');
+                // on mobile, also auto-open the image and messenger to speed up sending
+                if(isMobileDevice()){
+                    // open image in new tab so user can long-press to attach/send
+                    const imgWin = window.open(dataUrl, '_blank');
+                    // open messenger in another tab
+                    window.open('https://m.me/franz.aller', '_blank');
+                }
+            }catch(err){
+                console.error(err);
+                alert('Unable to capture screenshot automatically. The cart will open — please take a screenshot manually and send it to our Facebook: https://www.facebook.com/franz.aller/');
+                window.open('https://www.facebook.com/franz.aller/', '_blank');
+            }finally{
+                checkoutBtn.disabled = false; checkoutBtn.textContent = 'Checkout';
+            }
+        }
+        clearCartBtn.addEventListener('click', ()=>{ CART = []; saveCart(); renderCart(); });
+
+        // close cart on Esc
+        document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeCart(); });
+
+        // initial cart render
+        renderCart();
+
+        // If page opened with ?openCart=1, open the cart panel so user sees added items
+        (function(){
+            try{
+                const params = new URLSearchParams(window.location.search);
+                if(params.get('openCart') === '1'){
+                    setTimeout(()=>{ openCart(); }, 220);
+                }
+            }catch(e){}
+        })();
+
+        // Quantity modal logic
+        const qtyOverlay = document.getElementById('qtyOverlay');
+        const qtyName = document.getElementById('qtyName');
+        const qtyDisplay = document.getElementById('qtyDisplay');
+        const qtyMinus = document.getElementById('qtyMinus');
+        const qtyPlus = document.getElementById('qtyPlus');
+        const qtyAddBtn = document.getElementById('qtyAddBtn');
+        const qtyCancelBtn = document.getElementById('qtyCancelBtn');
+
+        let _qtyItem = null;
+
+        function openQtyModal(item){
+            _qtyItem = item;
+            qtyName.textContent = item.name;
+            qtyDisplay.textContent = '1';
+            qtyOverlay.classList.add('open');
+            qtyOverlay.setAttribute('aria-hidden','false');
+        }
+
+        function closeQtyModal(){
+            _qtyItem = null;
+            qtyOverlay.classList.remove('open');
+            qtyOverlay.setAttribute('aria-hidden','true');
+        }
+
+        qtyMinus.addEventListener('click', ()=>{
+            const v = Math.max(1, parseInt(qtyDisplay.textContent||'1',10)-1);
+            qtyDisplay.textContent = v;
+        });
+        qtyPlus.addEventListener('click', ()=>{
+            const v = Math.max(1, parseInt(qtyDisplay.textContent||'1',10)+1);
+            qtyDisplay.textContent = v;
+        });
+
+        qtyAddBtn.addEventListener('click', ()=>{
+            if(!_qtyItem) return closeQtyModal();
+            const qty = parseInt(qtyDisplay.textContent||'1',10) || 1;
+            addToCart({id: _qtyItem.id, name:_qtyItem.name, price:_qtyItem.price, image:_qtyItem.image}, qty);
+            closeQtyModal();
+            openCart();
+        });
+
+        qtyCancelBtn.addEventListener('click', ()=> closeQtyModal());
+        qtyOverlay.addEventListener('click', (e)=>{ if(e.target === qtyOverlay) closeQtyModal(); });
+        document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeQtyModal(); });
+
+        // Checkout modal handlers & utilities
+        const checkoutOverlay = document.getElementById('checkoutOverlay');
+        const checkoutClose = document.getElementById('checkoutClose');
+        const copyMsgBtn = document.getElementById('copyMsgBtn');
+        const downloadImgBtn = document.getElementById('downloadImgBtn');
+        const sendFbBtn = document.getElementById('sendFbBtn');
+        const checkoutPreview = document.getElementById('checkoutPreview');
+        const orderMessageEl = document.getElementById('orderMessage');
+
+        function isMobileDevice(){
+            return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.matchMedia('(pointer:coarse)').matches;
+        }
+
+        function generateOrderMessage(){
+            const lines = [];
+            lines.push('Order from Decantique');
+            lines.push('---');
+            CART.forEach(c=>{
+                lines.push((c.qty||1) + ' x ' + c.name + ' — ' + formatPrice(c.price) + ' each');
+            });
+            lines.push('---');
+            lines.push('Total: ' + formatPrice(String(computeTotal())));
+            lines.push('Please confirm availability and payment instructions.');
+            return lines.join('\n');
+        }
+
+        checkoutClose.addEventListener('click', ()=>{ checkoutOverlay.classList.remove('open'); checkoutOverlay.setAttribute('aria-hidden','true'); });
+
+        copyMsgBtn.addEventListener('click', async ()=>{
+            try{ await navigator.clipboard.writeText(orderMessageEl.value); alert('Message copied to clipboard. Paste it in Messenger.'); }
+            catch(e){ alert('Unable to copy. Please select the message and copy manually.'); }
+        });
+
+        downloadImgBtn.addEventListener('click', ()=>{
+            if(!checkoutPreview.src) return alert('No preview available');
+            const a = document.createElement('a'); a.href = checkoutPreview.src; a.download = 'decantique-order.png'; document.body.appendChild(a); a.click(); a.remove();
+        });
+
+        sendFbBtn.addEventListener('click', ()=>{
+            // open messenger; user should paste the message and attach the image
+            window.open('https://m.me/franz.aller', '_blank');
+        });
+
+        // Chatbot (rule-based recommendations)
+        const chatBtn = document.getElementById('chatBtn');
+        const chatPanel = document.getElementById('chatPanel');
+        const chatResults = document.getElementById('chatResults');
+
+        const RECOMMENDATIONS = {
+            day: [ 'Nautica Voyage Inspired — Decant 10ml', 'Gentle Fluidity Silver Inspired — Decant 10ml', 'Hawas Ice — Decant 10ml' ],
+            night: [ 'Modest Une — Decant 10ml', 'Supremacy Collectors Edition — Decant 10ml', 'YSL Ultime — Decant 10ml' ],
+            daily: [ 'SWYI inspired — Decant 10ml', 'Eros Flame Clone — Decant 10ml', 'Cocktail Intense — Decant 10ml' ],
+            versatile: [ 'Hawas Ice — Decant 10ml', 'Gentle Fluidity Silver Inspired — Decant 10ml', 'Modest Une — Decant 10ml' ]
+        };
+
+        function findItemByName(name){
+            const all = decants.concat(perfumes);
+            return all.find(i => i.name.toLowerCase().startsWith(name.split('—')[0].trim().toLowerCase()) || i.name.toLowerCase() === name.toLowerCase());
+        }
+
+        function renderRecommendations(key){
+            const list = RECOMMENDATIONS[key] || [];
+            chatResults.innerHTML = '';
+            if(list.length === 0){ chatResults.textContent = 'No recommendations found.'; return; }
+            list.forEach(n=>{
+                const div = document.createElement('div'); div.className = 'chat-result-item';
+                const left = document.createElement('div'); left.className = 'name'; left.textContent = n;
+                const addBtn = document.createElement('button'); addBtn.textContent = 'Add';
+                addBtn.addEventListener('click', ()=>{
+                    const item = findItemByName(n);
+                    if(item){ addToCart({id:item.id, name:item.name, price:item.price, image:getImageSrc(item)}, 1); alert(item.name + ' added to basket'); renderCart(); }
+                    else{ alert('Item not found in catalog'); }
+                });
+                div.appendChild(left); div.appendChild(addBtn);
+                chatResults.appendChild(div);
+            });
+        }
+
+        chatBtn.addEventListener('click', ()=>{
+            const open = chatPanel.classList.toggle('open');
+            chatPanel.setAttribute('aria-hidden', String(!open));
+        });
+
+        document.querySelectorAll('.chat-option').forEach(el=>{
+            el.addEventListener('click', ()=>{
+                const key = el.getAttribute('data-key');
+                renderRecommendations(key);
+            });
+        });
+    </script>
+</body>
+</html>
