@@ -41,6 +41,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            border: 0;
+            font-size: 1.6rem;
+            cursor: pointer;
         }
 
         .logo {
@@ -308,13 +317,57 @@
         .chat-result-item button{padding:6px 8px;border-radius:6px;border:0;background:var(--black);color:#fff;cursor:pointer}
 
         @media (max-width: 768px) {
+            .header {
+                padding: 0.6rem 1rem;
+            }
+            .hero {
+                padding: 4rem 1.5rem;
+            }
             .hero h1 {
                 font-size: 2rem;
             }
 
+            .logo{ font-size:1.1rem }
+
+            .menu-toggle {
+                display: block;
+                font-size: 1.6rem;
+                width:44px;height:44px;border-radius:8px;background:transparent;border:0;line-height:1;display:flex;align-items:center;justify-content:center
+            }
+
+            .menu-toggle:focus{outline:2px solid var(--gold);outline-offset:2px}
+
             .nav-links {
-                gap: 1rem;
-                font-size: 0.8rem;
+                gap: 0;
+                font-size: 1rem;
+                position: absolute;
+                top: 56px;
+                right: 0;
+                left: 0;
+                display: none;
+                flex-direction: column;
+                background: var(--white);
+                padding: 0.25rem 0.5rem;
+                border-radius: 0;
+                box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+            }
+
+            .nav-links.open {
+                display: flex;
+            }
+
+            .nav-links a {
+                padding: 0.9rem 1rem;
+                display: block;
+                width:100%;
+                border-bottom:1px solid #f6f6f6;
+                color:var(--black);
+            }
+
+            .nav-links a:focus{outline:2px solid var(--gold);outline-offset:-2px}
+
+            .featured-img {
+                height: auto;
             }
 
             .section {
@@ -324,6 +377,10 @@
             .section-title {
                 font-size: 1.8rem;
             }
+
+            /* move chat button to bottom-right on small screens */
+            .chat-btn{left:auto;right:16px;bottom:16px}
+            .chat-panel{left:auto;right:16px}
         }
     </style>
 </head>
@@ -334,11 +391,12 @@
                 <img id="logoImg" src="Images/logo.png" alt="site logo" style="height:36px;display:none;vertical-align:middle;margin-right:8px">
                 <span id="logoText">decantique</span><span class="logo-accent">✦</span>
             </div>
-            <ul class="nav-links">
-                <li><a href="#shop">SHOP</a></li>
-                <li><a href="#story">OUR STORY</a></li>
-                <li><a href="#how">HOW IT WORKS</a></li>
-                <li><a href="#contact">CONTACT</a></li>
+            <button class="menu-toggle" aria-expanded="false" aria-label="Toggle navigation">☰</button>
+            <ul id="navLinks" class="nav-links" role="menu" aria-hidden="true">
+                <li><a role="menuitem" href="#shop">SHOP</a></li>
+                <li><a role="menuitem" href="#story">OUR STORY</a></li>
+                <li><a role="menuitem" href="#how">HOW IT WORKS</a></li>
+                <li><a role="menuitem" href="#contact">CONTACT</a></li>
             </ul>
         </nav>
     </header>
@@ -598,6 +656,41 @@
             img.onload = function(){ img.style.display = 'inline-block'; if(text) text.style.display='none'; };
             img.onerror = function(){ img.style.display = 'none'; if(text) text.style.display='inline'; };
             // try to trigger load (browser will attempt automatically)
+        })();
+    </script>
+    <script>
+        (function(){
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.getElementById('navLinks');
+            let lastFocused = null;
+            function closeMenu(){
+                if(navLinks){ navLinks.classList.remove('open'); navLinks.setAttribute('aria-hidden','true'); }
+                if(menuToggle){ menuToggle.setAttribute('aria-expanded','false'); if(lastFocused) lastFocused.focus(); }
+            }
+            function openMenu(){
+                if(navLinks){ navLinks.classList.add('open'); navLinks.setAttribute('aria-hidden','false'); }
+                if(menuToggle){ menuToggle.setAttribute('aria-expanded','true'); }
+                const first = navLinks && navLinks.querySelector('a[role="menuitem"]'); if(first) first.focus();
+            }
+            if(menuToggle && navLinks){
+                menuToggle.addEventListener('click', (e)=>{
+                    e.stopPropagation();
+                    const open = navLinks.classList.toggle('open');
+                    if(open){ lastFocused = document.activeElement; navLinks.setAttribute('aria-hidden','false'); const first = navLinks.querySelector('a[role="menuitem"]'); if(first) first.focus(); menuToggle.setAttribute('aria-expanded','true'); }
+                    else { closeMenu(); }
+                });
+                document.addEventListener('click', (e)=>{
+                    if(!navLinks.contains(e.target) && !menuToggle.contains(e.target)){
+                        closeMenu();
+                    }
+                });
+                document.addEventListener('keydown', (e)=>{
+                    if(e.key === 'Escape' && navLinks.classList.contains('open')){
+                        closeMenu();
+                    }
+                });
+                window.addEventListener('resize', ()=> { if(window.innerWidth > 768){ closeMenu(); }});
+            }
         })();
     </script>
 </body>

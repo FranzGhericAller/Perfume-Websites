@@ -33,7 +33,19 @@
 
         .empty{padding:2rem;text-align:center;color:#666}
 
-        @media (max-width:600px){.thumb{height:110px}.thumb-img{height:110px}}
+        @media (max-width:600px){
+            .thumb{height:110px}
+            .thumb-img{height:110px}
+            .card{min-height:260px;padding:0.8rem}
+            .add{width:100%;padding:0.5rem;font-size:0.95rem}
+            .header{padding:0.6rem 1rem}
+            .logo{font-size:1.1rem}
+            .nav a{padding:8px 6px;display:inline-block}
+            /* move floating controls away from left side on small screens */
+            .chat-btn{left:auto;right:16px}
+            .cart-btn{right:16px;left:auto}
+            .cart-panel{width:92vw}
+        }
 
         /* Lightbox styles */
         .lightbox{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:9999;padding:1rem}
